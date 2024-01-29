@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 import numpy as np
 from itertools import product
+from scrapy import Selector
 import warnings
 import time
     
@@ -229,3 +230,48 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
             print(f"{res.status_code} error occured: {res.text}")
 
         return None
+
+
+def get_dataset_info():
+    """
+    Return a set of dataset, including the variable name, dataset id, latest version and edition.
+    """
+    # initialise the scrape
+    page = 1
+    dataset_uri = dict()
+    print("Retriveing ONS Census 2021 dataset info. This takes about a minute to complete.")
+
+    while True:
+        census_url = f"https://www.ons.gov.uk/search?page={page}&topics=9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367,9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367"
+        response = requests.get(census_url)
+        # break the while loop
+        if response.status_code != 200:
+            break
+        sel = Selector(response)
+        datasets = sel.xpath("//section[@role='contentinfo']/div[@class='search__results']//li")
+        for dataset in datasets:
+            uri = dataset.xpath("h3/a/@href").extract()[0]
+            label = dataset.xpath("h3/a/text()").get().replace("\n","")
+            dataset_uri[uri] = label
+        time.sleep(1)
+        page +=1
+
+    # parse into dataframe
+    df = pd.DataFrame.from_dict(dataset_uri, orient = "index").reset_index()
+    df.columns = ['uri','variable']
+
+    # subset for datasets
+    df = df[df['uri'].str.contains("^/datasets/")].reset_index(drop = True)
+
+    # parse info from the dataset uri
+    df['uri_comp']= df['uri'].str.split("/")
+    try:
+        uri_comp = list(df['uri_comp'].apply(lambda uri: (uri[2],uri[4],uri[6])))
+        dataset_details = pd.DataFrame(uri_comp, columns = ["dataset_id","latest_vers","latest_ed"])
+
+        # return the dataset information
+        df = pd.merge(df['variable'], dataset_details, left_index = True, right_index = True)
+        return df
+    except:
+        print("unable to parse the uri")
+        return df
