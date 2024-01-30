@@ -125,7 +125,7 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
     else:
         # check if the version/edition/dataset is valid
         q = f"https://api.beta.ons.gov.uk/v1/datasets/{datasetId}/editions/{edition}/versions/{version}"
-        res = requests_get(q, header)
+        res = requests.get(q, headers = header)
 
         if res.status_code == 200:
             # loop over all the area code parsed in
@@ -135,7 +135,7 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
             # check if the area-type and area code is available
             for area in area_code:
                 q = f"https://api.beta.ons.gov.uk/v1/datasets/{datasetId}/editions/{edition}/versions/{version}/json?area-type={area_type},{area}"
-                res = requests_get(q, header) # note that it will only return a request is status code = 200
+                res = requests.get(q, headers = header) # note that it will only return a request is status code = 200
                 try:
                     new_data = parse_api_result(res)
                     df = pd.concat([df,new_data], ignore_index=True)
@@ -150,8 +150,8 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
 
         
         else:
-            res = requests.get(q, headers = headers)
-            print(f"{res.status_code} error occured: {res.text}")
+            error_msg = res.text.replace("\n","")
+            print(f"{res.status_code} error occured: {error_msg}")
 
         return None
 
