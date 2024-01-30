@@ -127,7 +127,8 @@ dataset_id['variable'] = dataset_id['variable'].str.lower()
 def lookup_dataset(keyword = None):
     """
     Return a list of variables if no keyword is passed. 
-    Otherwise, return the pd.DF dataset id that matches with the variable
+    Otherwise, return the pd.DF dataset id that matches with the variable.
+    Note that the result from the function may not be comprehensive.
     """
     if keyword is not None:
         keyword = keyword.lower().strip()
@@ -139,11 +140,23 @@ def lookup_dataset(keyword = None):
     return None
 
 # request census data
-def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, area_type = "msoa", edition = 2021):
+def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, area_type = "msoa", edition = 2021, verbose = 0):
     """
     Send API request for retrieving ONS Census 2021.
     Depending on the dataset, the version and edition available is different.
     Simiarly, the data may also be available only for certain area type.
+    
+    Parameters:
+    --------
+    area_code: list
+        A list of area codes for which census 2021 data are to be returned. The area code must match with the area_type
+    datasetId: str
+        The ID of the variables (i.e. dataset) to request data for. the lookup_dataset function could 
+    verbose: int {0,1,2}
+        By default, set at 0 where all status are printed.
+        =1, only raise print when request error occued
+        =2, no meessage is printed
+    
     """
     # get the user agent 
     try: 
