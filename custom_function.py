@@ -80,7 +80,7 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
     if verbose != 0:
         trap = io.StringIO()
         with redirect_stdout(trap):
-            res = requests.get(census_url)
+            res = requests_get(url, header)
     else:
         res = requests_get(url, header)
 
