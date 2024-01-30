@@ -6,6 +6,8 @@ from itertools import product
 from scrapy import Selector
 import warnings
 import time
+import io
+from contextlib import redirect_stdout
     
 
 # define requets workflow
@@ -74,7 +76,14 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
     
     # request api
     url = f"https://api.beta.ons.gov.uk/v1/datasets/{datasetId}/editions/{edition}/versions/{version}/json?area-type={area_type},{area_str}"
-    res = requests_get(url, header)
+    # request url
+    if verbose != 0:
+        trap = io.StringIO()
+        with redirect_stdout(trap):
+            res = requests.get(census_url)
+    else:
+        res = requests_get(url, header)
+
     time.sleep(0.2)
 
     # define parse result
@@ -159,8 +168,9 @@ def get_dataset_info():
     print("Retriveing ONS Census 2021 dataset info. This takes about a minute to complete.")
 
     while True:
-        census_url = f"https://www.ons.gov.uk/search?page={page}&topics=9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367,9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367"
+        census_url = f"https://www.ons.gov.uk/search?page={page}&topics=9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367,9731,6646,3845,7267,9497,4262,8463,4128,7755,4994,6885,9724,7367"    
         response = requests.get(census_url)
+
         # break the while loop
         if response.status_code != 200:
             break
