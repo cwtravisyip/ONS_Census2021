@@ -140,7 +140,7 @@ def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, ar
                     new_data = parse_api_result(res)
                     df = pd.concat([df,new_data], ignore_index=True)
                 
-                except AttributeError:
+                except:
                     print(f"The API is not able to locate area {area_type} {area}")
 
             if len(df) > 0:
