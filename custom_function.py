@@ -30,20 +30,31 @@ def requests_get(url,headers):
 
 
 # define lookup dataset id 
-def lookup_dataset(keyword = None):
-    """
-    Return a list of variables if no keyword is passed. 
-    Otherwise, return the pd.DF dataset id that matches with the variable.
-    Note that the result from the function may not be comprehensive.
-    """
-    if keyword is not None:
-        keyword = keyword.lower().strip()
-        filter_dataset = dataset_id.str.contains(keyword)
-        if len(filter_dataset) != 0:
-            return filter_dataset
-    
-    print(f"The list of variable available: {dataset_id['variable'].values}")
-    return None
+class ons_dataset:
+
+    def __init__(self):
+        """
+        return the dataset id
+        """
+        self.dataset_id = get_dataset_info()
+
+
+    def lookup_dataset(self, keyword = None):
+        """
+        Return a list of variables if no keyword is passed. 
+        Otherwise, return the pd.DF dataset id that matches with the variable.
+        Note that the result from the function may not be comprehensive.
+        """
+        if keyword is not None:
+            keyword = keyword.lower().strip()
+            filter_dataset = self.dataset_id[self.dataset_id["variable"].str.contains(keyword)]
+            if len(filter_dataset) != 0:
+                return filter_dataset
+            else:
+                print("No variable matching the keyword. Printing all possible variables.")
+        
+        print(f"The list of variable available: {self.dataset_id['variable'].values}")
+        return None
 
 # request census data
 def requests_census2021_api(area_code: list,datasetId = "TS009", version = 1, area_type = "msoa", edition = 2021, verbose = 0):
